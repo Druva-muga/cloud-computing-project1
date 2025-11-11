@@ -5,7 +5,15 @@ const cors = require("cors");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// ✅ IMPORTANT: Update this to your actual Netlify site URL
+app.use(
+  cors({
+    origin: ["https://serene-tanuki-2c99c0.netlify.app"], 
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 mongoose
   .connect(process.env.MONGO_URI, {
