@@ -14,21 +14,24 @@ const FaceAttendance = () => {
     const loadModels = async () => {
       try {
         setStatus("Loading face models...");
+
         await faceapi.nets.tinyFaceDetector.loadFromUri(
-          "/models/tiny_face_detector_model"
+          "/models/tiny_face_detector_model-weights_manifest.json"
         );
         await faceapi.nets.faceLandmark68Net.loadFromUri(
-          "/models/face_landmark_68_model"
+          "/models/face_landmark_68_model-weights_manifest.json"
         );
         await faceapi.nets.faceRecognitionNet.loadFromUri(
-          "/models/face_recognition_model"
+          "/models/face_recognition_model-weights_manifest.json"
         );
+
         startVideo();
       } catch (error) {
         console.error("Model loading failed:", error);
-        setStatus("Error loading models. Please refresh the page.");
+        setStatus("Error loading models.");
       }
     };
+
     loadModels();
   }, []);
 
@@ -37,7 +40,7 @@ const FaceAttendance = () => {
       .getUserMedia({ video: true })
       .then((stream) => {
         videoRef.current.srcObject = stream;
-        setStatus("Camera ready. Look straight into the camera.");
+        setStatus("Camera ready. Look straight.");
       })
       .catch(() => setStatus("Camera access denied."));
   };
@@ -52,18 +55,13 @@ const FaceAttendance = () => {
       .withFaceDescriptor();
 
     if (!detection) {
-      setStatus("No face detected. Please try again.");
+      setStatus("No face detected.");
       setIsLoading(false);
       return;
     }
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        setStatus("Not logged in. Please login first.");
-        return;
-      }
-
       const userId = jwtDecode(token).id;
 
       const response = await axios.post(`${backend}/api/face/verify-face`, {
@@ -71,10 +69,9 @@ const FaceAttendance = () => {
         descriptor: detection.descriptor,
       });
 
-      setStatus(response.data.message || "Attendance marked successfully!");
+      setStatus(response.data.message);
     } catch (error) {
-      console.error("Face verification failed:", error);
-      setStatus(error.response?.data?.message || "Error verifying face");
+      setStatus("Error verifying face");
     } finally {
       setIsLoading(false);
     }

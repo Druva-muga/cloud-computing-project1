@@ -14,21 +14,24 @@ const RegisterFace = () => {
     const loadModels = async () => {
       try {
         setStatus("Loading face models...");
+
         await faceapi.nets.tinyFaceDetector.loadFromUri(
-          "/models/tiny_face_detector_model"
+          "/models/tiny_face_detector_model-weights_manifest.json"
         );
         await faceapi.nets.faceLandmark68Net.loadFromUri(
-          "/models/face_landmark_68_model"
+          "/models/face_landmark_68_model-weights_manifest.json"
         );
         await faceapi.nets.faceRecognitionNet.loadFromUri(
-          "/models/face_recognition_model"
+          "/models/face_recognition_model-weights_manifest.json"
         );
+
         startVideo();
       } catch (error) {
         console.error("Model loading failed:", error);
-        setStatus("Error loading models. Please refresh the page.");
+        setStatus("Error loading models.");
       }
     };
+
     loadModels();
   }, []);
 
@@ -60,7 +63,7 @@ const RegisterFace = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setStatus("Not logged in. Please login first.");
+        setStatus("Not logged in.");
         return;
       }
 
@@ -71,10 +74,9 @@ const RegisterFace = () => {
         descriptor: detection.descriptor,
       });
 
-      setStatus(response.data.message || "Face registered successfully!");
+      setStatus(response.data.message || "Face registered!");
     } catch (error) {
-      console.error("Face registration failed:", error);
-      setStatus(error.response?.data?.message || "Error registering face");
+      setStatus("Error registering face");
     } finally {
       setIsLoading(false);
     }
