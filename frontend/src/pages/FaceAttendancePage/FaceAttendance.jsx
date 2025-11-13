@@ -4,76 +4,69 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import "./FaceAttendance.css";
 
+const backend = "https://cloud-computing-project1.onrender.com";
+
 const FaceAttendance = () => {
   const videoRef = useRef();
   const [status, setStatus] = useState("Initializing...");
-  const [isLoading, setIsLoading] = useState(false);
-  const backend = "https://cloud-computing-project1.onrender.com";
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const loadModels = async () => {
       try {
-        setStatus("Loading face models...");
-
-        await faceapi.nets.tinyFaceDetector.loadFromUri(
-          "/models/tiny_face_detector_model-weights_manifest.json"
-        );
-        await faceapi.nets.faceLandmark68Net.loadFromUri(
-          "/models/face_landmark_68_model-weights_manifest.json"
-        );
-        await faceapi.nets.faceRecognitionNet.loadFromUri(
-          "/models/face_recognition_model-weights_manifest.json"
-        );
-
+        setStatus("Loading models...");
+        await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+        await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
+        await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
         startVideo();
       } catch (error) {
-        console.error("Model loading failed:", error);
-        setStatus("Error loading models.");
+        console.error("Model error:", error);
+        setStatus("Model load failed.");
       }
     };
-
     loadModels();
   }, []);
 
-  const startVideo = () => {
-    navigator.mediaDevices
-      .getUserMedia({ video: true })
-      .then((stream) => {
-        videoRef.current.srcObject = stream;
-        setStatus("Camera ready. Look straight.");
-      })
-      .catch(() => setStatus("Camera access denied."));
+  const startVideo = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoRef.current.srcObject = stream;
+      setStatus("Camera ready.");
+    } catch {
+      setStatus("Camera access denied");
+    }
   };
 
-  const handleMarkAttendance = async () => {
-    setIsLoading(true);
-    setStatus("Detecting face...");
-
-    const detection = await faceapi
-      .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
-      .withFaceDescriptor();
-
-    if (!detection) {
-      setStatus("No face detected.");
-      setIsLoading(false);
-      return;
-    }
-
+  const markAttendance = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const userId = jwtDecode(token).id;
+      setLoading(true);
+      setStatus("Detecting face...");
 
-      const response = await axios.post(`${backend}/api/face/verify-face`, {
-        userId,
-        descriptor: detection.descriptor,
-      });
+      const det = await faceapi
+        .detectSingleFace(videoRef.current, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+      if (!det) {
+        setStatus("Face not detected.");
+        setLoading(false);
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        `${backend}/api/face/verify-face`,
+        { descriptor: det.descriptor },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       setStatus(response.data.message);
-    } catch (error) {
-      setStatus("Error verifying face");
+    } catch (err) {
+      console.error(err);
+      setStatus("Verification failed.");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -81,8 +74,8 @@ const FaceAttendance = () => {
     <div className="face-container">
       <h2>Face Attendance</h2>
       <video ref={videoRef} autoPlay muted width="480" height="360" />
-      <button onClick={handleMarkAttendance} disabled={isLoading}>
-        {isLoading ? "Processing..." : "Mark Attendance"}
+      <button onClick={markAttendance} disabled={loading}>
+        {loading ? "Processing..." : "Mark Attendance"}
       </button>
       <p className="status">{status}</p>
     </div>

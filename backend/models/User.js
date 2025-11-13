@@ -5,7 +5,16 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["admin", "employee"], default: "employee" },
-  faceDescriptor: { type: [Number], default: [] }, // ✅ Added for face recognition
+
+  // MUST be a flat array of numbers
+  faceDescriptor: {
+    type: [Number],
+    default: [],
+    validate: {
+      validator: (arr) => arr.length === 0 || arr.length === 128,
+      message: "Face descriptor must contain 128 numbers."
+    }
+  }
 });
 
 module.exports = mongoose.model("User", UserSchema);
