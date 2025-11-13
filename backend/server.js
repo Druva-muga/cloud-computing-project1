@@ -6,10 +6,13 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 
-// CORS for Netlify
+// CORS for Localhost + Netlify
 app.use(
   cors({
-    origin: ["https://serene-tanuki-2c99c0.netlify.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://serene-tanuki-2c99c0.netlify.app"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -28,10 +31,9 @@ mongoose
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/attendance", require("./routes/attendance"));
 app.use("/api/admin", require("./routes/admin"));
-app.use("/api/face", require("./routes/face"));
+app.use("/api/face", require("./routes/face")); // <-- Important
 
-
-// Default route
+// Default
 app.get("/", (req, res) => {
   res.send("API Running...");
 });
