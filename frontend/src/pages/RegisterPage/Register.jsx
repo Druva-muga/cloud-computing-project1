@@ -16,16 +16,14 @@ const Register = () => {
     event.preventDefault();
 
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
-        name,
-        email,
-        password,
-        role,
-      });
+      await axios.post(
+        "https://cloud-computing-project1.onrender.com/api/auth/register",
+        { name, email, password, role }
+      );
       alert("Registration Successful!");
-      navigate("/");
+      navigate("/login");
     } catch (error) {
-      alert("Registration Failed: " + error.response.data.message);
+      alert("Registration Failed. Try again.");
     }
   };
 

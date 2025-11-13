@@ -8,6 +8,10 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import "./App.css";
 import { AuthProvider } from "./context/AuthContext";
+import FaceAttendance from "./pages/FaceAttendancePage/FaceAttendance";
+import RegisterFace from "./pages/FaceAttendancePage/RegisterFace";
+
+
 
 function App() {
   return (
@@ -21,6 +25,8 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/" element={<Overview />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/face-attendance" element={<FaceAttendance />} />
+              <Route path="/register-face" element={<RegisterFace />} />
             </Routes>
           </div>
           <Footer />

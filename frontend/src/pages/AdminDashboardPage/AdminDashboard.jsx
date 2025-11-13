@@ -16,6 +16,8 @@ const AdminDashboard = () => {
   const [showAttendance, setShowAttendance] = useState(false);
   const navigate = useNavigate();
 
+  const backend = "https://cloud-computing-project1.onrender.com";
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -34,7 +36,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = () => {
     axios
-      .get("http://localhost:5000/api/admin/users", {
+      .get(`${backend}/api/admin/users`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
       .then(({ data }) => setUsers(data))
@@ -45,13 +47,13 @@ const AdminDashboard = () => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, {
+      await axios.delete(`${backend}/api/admin/users/${userId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       alert("User and their attendance records deleted successfully!");
       fetchUsers();
     } catch (error) {
-      console.error("Error deleting user:", error.response?.data);
+      console.error("Error deleting user:", error?.response?.data);
       alert("Failed to delete user.");
     }
   };
@@ -59,23 +61,21 @@ const AdminDashboard = () => {
   const changeUserRole = async (userId, newRole) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/admin/users/${userId}/role`,
+        `${backend}/api/admin/users/${userId}/role`,
         { role: newRole },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
       alert(`User role updated to ${newRole}!`);
       fetchUsers();
     } catch (error) {
-      console.error("Error updating role:", error.response?.data);
+      console.error("Error updating role:", error?.response?.data);
       alert("Failed to update role.");
     }
   };
 
   const fetchAttendance = () => {
     axios
-      .get("http://localhost:5000/api/admin/attendance", {
+      .get(`${backend}/api/admin/attendance`, {
         params: {
           userId: selectedUser,
           date: selectedDate.toISOString().split("T")[0],
@@ -88,7 +88,7 @@ const AdminDashboard = () => {
   const addAttendance = async () => {
     try {
       await axios.post(
-        "http://localhost:5000/api/admin/attendance",
+        `${backend}/api/admin/attendance`,
         {
           userId: selectedUser,
           date: selectedDate.toISOString().split("T")[0],
@@ -104,14 +104,14 @@ const AdminDashboard = () => {
       alert("Attendance saved!");
       fetchAttendance();
     } catch (error) {
-      console.error("Error saving attendance:", error.response?.data);
+      console.error("Error saving attendance:", error?.response?.data);
       alert("Failed to save attendance");
     }
   };
 
   const fetchAllAttendance = () => {
     axios
-      .get("http://localhost:5000/api/admin/attendance/all", {
+      .get(`${backend}/api/admin/attendance/all`, {
         params: { userId: selectedUser },
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
@@ -120,22 +120,20 @@ const AdminDashboard = () => {
         setShowAttendance(true);
       })
       .catch((err) => {
-        console.error("Error fetching attendance:", err.response?.data);
+        console.error("Error fetching attendance:", err?.response?.data);
         alert("Failed to fetch attendance records");
       });
   };
 
   const deleteAttendance = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/admin/attendance/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+      await axios.delete(`${backend}/api/admin/attendance/${id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       alert("Attendance deleted!");
       fetchAttendance();
     } catch (error) {
-      console.error("Error deleting attendance:", error.response?.data);
+      console.error("Error deleting attendance:", error?.response?.data);
     }
   };
 
@@ -198,7 +196,7 @@ const AdminDashboard = () => {
           <DatePicker
             selected={selectedDate}
             onChange={(date) => setSelectedDate(date)}
-            dateFormat="YYYY MMMM dd"
+            dateFormat="yyyy-MM-dd"
             className="input-select"
           />
 

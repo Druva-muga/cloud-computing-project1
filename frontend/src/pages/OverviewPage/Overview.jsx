@@ -16,60 +16,45 @@ function Overview() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      console.error("No token found in localStorage");
       navigate("/login");
       return;
     }
 
-    const fetchAttendanceSummary = (userId) => {
+    const backend = "https://cloud-computing-project1.onrender.com";
+
+    const userId = jwtDecode(token).id;
+
+    const fetchAttendanceSummary = () => {
       setLoading(true);
       axios
-        .get(`http://localhost:5000/api/attendance/summary/${userId}`, {
+        .get(`${backend}/api/attendance/summary/${userId}`, {
           params: { year: selectedYear, month: selectedMonth },
         })
         .then(({ data }) => {
           setSummary(data);
           setLoading(false);
         })
-        .catch((err) => {
-          console.error("Error fetching attendance summary:", err);
-          alert("Failed to fetch attendance data. Please try again later.");
+        .catch(() => {
+          alert("Failed to load data");
           setLoading(false);
         });
     };
 
-    const fetchDailyAttendance = (userId) => {
+    const fetchDailyAttendance = () => {
       setLoading(true);
-      console.log(
-        `Fetching attendance for UserID: ${userId}, Year: ${selectedYear}, Month: ${selectedMonth}`
-      );
-
       axios
-        .get(`http://localhost:5000/api/attendance/details/${userId}`, {
+        .get(`${backend}/api/attendance/details/${userId}`, {
           params: { year: selectedYear, month: selectedMonth },
         })
         .then(({ data }) => {
-          console.log("Fetched Attendance Data:", data);
           setAttendanceDetails(data);
           setLoading(false);
         })
-        .catch((err) => {
-          console.error(
-            "Error fetching daily attendance:",
-            err.response?.data || err.message
-          );
-          setLoading(false);
-        });
+        .catch(() => setLoading(false));
     };
 
-    try {
-      const userId = jwtDecode(token).id;
-      fetchAttendanceSummary(userId);
-      fetchDailyAttendance(userId);
-    } catch (err) {
-      console.error("Invalid token:", err);
-      navigate("/login");
-    }
+    fetchAttendanceSummary();
+    fetchDailyAttendance();
   }, [selectedMonth, selectedYear, navigate]);
 
   const getAllDaysOfMonth = () => {
@@ -150,27 +135,6 @@ function Overview() {
           </tbody>
         </table>
       )}
-
-      <div className="attendance-table-container">
-        <div className="scrollable-table">
-          <table className="attendance-detail-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {getAllDaysOfMonth().map((record, index) => (
-                <tr key={index}>
-                  <td>{moment(record.date).format("YYYY-MM-DD")}</td>
-                  <td>{record.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   );
 }

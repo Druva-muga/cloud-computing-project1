@@ -6,6 +6,7 @@ import { TbListDetails } from "react-icons/tb";
 import { IoLogInOutline, IoLogOutOutline } from "react-icons/io5";
 import { HiOutlineUserAdd } from "react-icons/hi";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
+import { FaRegSmileBeam } from "react-icons/fa"; // 👈 for Face Attendance icon
 import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
@@ -25,12 +26,14 @@ const Navbar = () => {
           <Link to={"/"}>
             <img src={Logo} alt="Logo" />
           </Link>
+
           <nav>
             <ul className={isOpen ? "display" : ""}>
               <div className="btn" onClick={() => setIsOpen(false)}>
                 <i className="fas fa-times close-btn"></i>
               </div>
 
+              {/* ✅ For all logged-in users (Overview visible) */}
               {user && (
                 <li>
                   <NavLink to={"/"}>
@@ -41,6 +44,29 @@ const Navbar = () => {
                 </li>
               )}
 
+              {/* ✅ For employees only — Face Attendance and Face Registration */}
+              {user?.role === "employee" && (
+                <>
+                  <li>
+                    <NavLink to={"/face-attendance"}>
+                      <div className="nav-item">
+                        <FaRegSmileBeam className="nav-icn" /> Face Attendance
+                      </div>
+                    </NavLink>
+                  </li>
+
+                  {/* Optional: Face registration page (if you have a separate route for face data setup) */}
+                  <li>
+                    <NavLink to={"/register-face"}>
+                      <div className="nav-item">
+                        <FaRegSmileBeam className="nav-icn" /> Register Face
+                      </div>
+                    </NavLink>
+                  </li>
+                </>
+              )}
+
+              {/* ✅ For admin only — Admin Dashboard */}
               {user?.role === "admin" && (
                 <li>
                   <NavLink to={"/admin"}>
@@ -51,6 +77,7 @@ const Navbar = () => {
                 </li>
               )}
 
+              {/* ✅ Login/Register or Logout */}
               {!user ? (
                 <>
                   <li>
@@ -77,6 +104,7 @@ const Navbar = () => {
               )}
             </ul>
           </nav>
+
           <div className="btn" onClick={() => setIsOpen(true)}>
             <i className="fas fa-bars menu-btn"></i>
           </div>
